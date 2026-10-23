@@ -9,4 +9,5 @@ venv/
 cloudflared.exe
 mingit/
 *.zip
+*.log
 data/temp_uploads/
