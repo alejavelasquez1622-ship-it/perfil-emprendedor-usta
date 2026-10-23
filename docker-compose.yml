@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  usta-perfil-emprendedor:
+    build: .
+    container_name: usta_perfil_app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=usta-villavicencio-proyeccion-social-production-secret-key-2026
+      - DATABASE_URL=sqlite:////app/data/usta_perfil.db
+    volumes:
+      - ./data:/app/data

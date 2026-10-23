@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Perfil Emprendedor | Universidad Santo Tomás Villavicencio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        usta: {
+                            navy: '#0B2545',
+                            navylight: '#133E87',
+                            gold: '#FDB813',
+                            goldhover: '#E5A50B',
+                            red: '#8B0000',
+                            tableheader: '#EBF3FA',
+                            bg: '#F8FAFC'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- TOP INSTITUTIONAL BAR -->
+    <header class="bg-[#0B2545] text-white shadow-md border-b-4 border-[#FDB813] sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3.5">
+                <img src="/static/img/logo_usta.png" alt="Logo Universidad Santo Tomás" class="h-12 w-auto object-contain bg-white rounded-full p-0.5 shadow-sm">
+                <div>
+                    <h1 class="text-xs sm:text-sm font-bold tracking-wide uppercase text-slate-200 leading-tight">Universidad Santo Tomás · Seccional Villavicencio</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm sm:text-base font-extrabold text-white tracking-tight">Sistema de Análisis y Seguimiento del Perfil Emprendedor</span>
+                    </div>
+                    <p class="text-xs text-slate-300 font-medium">Dirección de Proyección Social</p>
+                </div>
+            </div>
+
+            <!-- User Status / Login Actions -->
+            <div class="flex items-center space-x-3">
+                <div id="user-header-status" class="hidden flex items-center space-x-2">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-display-name" class="text-xs font-semibold text-white leading-tight">Funcionario</p>
+                        <span id="user-display-role" class="px-2 py-0.5 rounded text-xs font-semibold badge-admin">Administrador</span>
+                    </div>
+                    <button onclick="App.logout()" title="Cerrar sesión" class="bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-2.5 py-1.5 rounded text-xs font-medium border border-slate-700 transition">
+                        Salir
+                    </button>
+                </div>
+                <button id="btn-open-login" onclick="App.openLoginModal()" class="bg-[#FDB813] hover:bg-[#E5A50B] text-[#0B2545] px-3 py-1.5 rounded text-xs font-bold transition shadow-sm">
+                    Acceder
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- AUTHENTICATION GATE (Visible when not logged in - protects university data) -->
+    <!-- ========================================================================= -->
+    <div id="auth-portal" class="flex-1 flex items-center justify-center p-4 py-12">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8 border-t-4 border-[#FDB813] border-x border-b border-gray-200">
+            <div class="text-center mb-6">
+                <img src="/static/img/logo_usta.png" alt="Logo Universidad Santo Tomás" class="h-20 w-auto mx-auto mb-3 object-contain">
+                <h2 class="text-sm font-extrabold uppercase text-[#0B2545] tracking-wide">Universidad Santo Tomás</h2>
+                <p class="text-xs font-semibold text-gray-500 uppercase">Seccional Villavicencio · Dirección de Proyección Social</p>
+                <div class="mt-3 py-1.5 px-3 bg-blue-50 rounded-lg inline-block border border-blue-100">
+                    <span class="text-xs font-bold text-blue-950">Sistema de Análisis y Seguimiento del Perfil Emprendedor</span>
+                </div>
+            </div>
+
+            <div class="mb-5 p-3.5 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900 flex items-start space-x-2.5">
+                <span class="text-base flex-shrink-0">🔒</span>
+                <p class="leading-relaxed">
+                    <strong>Acceso Restringido:</strong> Por motivos de seguridad institucional y en cumplimiento de la Ley 1581 de 2012, debe autenticarse para consultar los resultados, indicadores y generar informes de las facultades.
+                </p>
+            </div>
+
+            <form onsubmit="App.submitPortalLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico Institucional</label>
+                    <input type="email" id="portal-email" required placeholder="funcionario@usta.edu.co" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Contraseña de Acceso</label>
+                    <input type="password" id="portal-password" required placeholder="••••••••••••" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition">
+                </div>
+                <button type="submit" class="w-full bg-[#0B2545] hover:bg-blue-950 text-white font-bold py-3 rounded-lg text-sm transition shadow-md flex items-center justify-center space-x-2">
+                    <span>Acceder al Sistema</span>
+                    <span>➔</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER: SIDEBAR + CONTENT (Visible only when authenticated) -->
+    <div id="app-main-layout" class="hidden flex-1 flex max-w-7xl w-full mx-auto">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-64 bg-[#0B2545] text-slate-300 flex-shrink-0 hidden md:block border-r border-slate-800 shadow-inner">
+            <nav class="py-4 space-y-1">
+                <a href="#" data-view="resumen" class="nav-link flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">🏠</span> Inicio / Resumen
+                </a>
+                <a href="#" data-view="dashboard" class="nav-link flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">📊</span> Panel de Análisis
+                </a>
+                <a href="#" data-view="facultad" class="nav-link flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">🏛️</span> Análisis por Facultad
+                </a>
+                <a href="#" data-view="comparacion" class="nav-link flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">⚖️</span> Comparación de Periodos
+                </a>
+                <a href="#" data-view="cargar" class="nav-link admin-only flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">📤</span> Cargar Información
+                </a>
+                <a href="#" data-view="informes" class="nav-link flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">📄</span> Generar Informes (PDF)
+                </a>
+                <a href="#" data-view="historico" class="nav-link flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">🕒</span> Histórico de Periodos
+                </a>
+                <a href="#" data-view="admin" class="nav-link admin-only flex items-center px-4 py-2.5 text-sm font-medium hover:bg-[#133E87] hover:text-white transition">
+                    <span class="mr-3 text-lg">⚙️</span> Administración
+                </a>
+            </nav>
+
+            <div class="px-4 py-6 border-t border-slate-800 text-xs text-slate-400">
+                <p class="font-bold text-slate-300">Dirección de Proyección Social</p>
+                <p class="mt-1">Universidad Santo Tomás</p>
+                <p>Villavicencio, Meta</p>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW CONTAINER -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+
+            <!-- MOBILE NAV TABS (for smaller screens) -->
+            <div class="md:hidden flex overflow-x-auto space-x-1 pb-3 mb-4 border-b border-gray-200">
+                <button onclick="App.switchView('resumen')" class="px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Inicio</button>
+                <button onclick="App.switchView('dashboard')" class="px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Dashboard</button>
+                <button onclick="App.switchView('facultad')" class="px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Facultad</button>
+                <button onclick="App.switchView('comparacion')" class="px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Comparación</button>
+                <button onclick="App.switchView('cargar')" class="admin-only px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Cargar Excel</button>
+                <button onclick="App.switchView('informes')" class="px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Informes</button>
+                <button onclick="App.switchView('historico')" class="px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Histórico</button>
+                <button onclick="App.switchView('admin')" class="admin-only px-3 py-1.5 rounded text-xs font-semibold bg-gray-200 whitespace-nowrap">Admin</button>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 1: RESUMEN / INICIO -->
+            <!-- ========================================================================= -->
+            <section id="view-resumen" class="view-section space-y-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-[#0B2545] to-[#133E87] rounded-lg p-6 text-white shadow-sm flex flex-col md:flex-row items-center justify-between">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold">Diagnóstico de Perfil Emprendedor</h2>
+                        <p class="text-sm text-slate-200 mt-1 max-w-2xl">
+                            Herramienta institucional para procesar, caracterizar, consultar y emitir informes oficiales sobre las vocaciones e iniciativas emprendedoras de los estudiantes de la Universidad Santo Tomás, Seccional Villavicencio.
+                        </p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex space-x-2">
+                        <button onclick="App.switchView('dashboard')" class="bg-[#FDB813] hover:bg-[#E5A50B] text-[#0B2545] px-4 py-2 rounded-md font-bold text-xs shadow-sm transition">
+                            Explorar Dashboard
+                        </button>
+                        <button onclick="App.switchView('informes')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-md font-medium text-xs border border-white/20 transition">
+                            Generar Informes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Global Stats Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="usta-card p-4 kpi-card">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Encuestas Totales</p>
+                        <h3 id="res-total-encuestas" class="text-2xl font-black text-[#0B2545] mt-1">0</h3>
+                        <p class="text-xs text-gray-500 mt-1">Todas las cohortes</p>
+                    </div>
+                    <div class="usta-card p-4 kpi-card green">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Respuestas Autorizadas</p>
+                        <h3 id="res-total-autorizadas" class="text-2xl font-black text-green-700 mt-1">0</h3>
+                        <p class="text-xs text-gray-500 mt-1">Población de análisis</p>
+                    </div>
+                    <div class="usta-card p-4 kpi-card gold">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Con Iniciativa / Idea</p>
+                        <h3 id="res-con-iniciativa" class="text-2xl font-black text-[#B45309] mt-1">0</h3>
+                        <p class="text-xs text-gray-500 mt-1">Emprendedores activos</p>
+                    </div>
+                    <div class="usta-card p-4 kpi-card">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Facultades Evaluadas</p>
+                        <h3 id="res-facultades-count" class="text-2xl font-black text-[#0B2545] mt-1">0</h3>
+                        <p class="text-xs text-gray-500 mt-1">Unidades académicas</p>
+                    </div>
+                </div>
+
+                <!-- Periods Overview Table -->
+                <div class="usta-card p-6">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3">
+                        <div>
+                            <h3 class="text-base font-bold text-blue-950">Periodos Académicos Registrados</h3>
+                            <p class="text-xs text-gray-500">Histórico de cargas y vigencias del diagnóstico institucional</p>
+                        </div>
+                        <button onclick="App.switchView('cargar')" class="admin-only text-xs bg-blue-900 hover:bg-blue-800 text-white font-medium px-3 py-1.5 rounded transition">
+                            + Cargar Nuevo Periodo
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Periodo</th>
+                                    <th class="text-left">Total Recibidas</th>
+                                    <th class="text-left">Autorizadas</th>
+                                    <th class="text-left">Facultades</th>
+                                    <th class="text-left">Última Actualización</th>
+                                    <th class="text-left">Estado</th>
+                                    <th class="text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="res-periods-table-body">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-gray-400">Cargando periodos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 2: PANEL DE ANÁLISIS (DASHBOARD) -->
+            <!-- ========================================================================= -->
+            <section id="view-dashboard" class="view-section hidden space-y-6">
+                <!-- Filter Bar -->
+                <div class="usta-card p-4 bg-white shadow-sm border border-gray-200">
+                    <div class="flex items-center justify-between mb-3 border-b pb-2">
+                        <h3 class="text-sm font-bold text-blue-950 flex items-center">
+                            <span class="mr-2">🔍</span> Filtros del Panel de Análisis
+                        </h3>
+                        <button onclick="App.loadDashboardView()" class="text-xs bg-blue-900 hover:bg-blue-800 text-white font-medium px-3 py-1 rounded transition">
+                            Aplicar Filtros
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Académico</label>
+                            <select id="dash-filter-period" onchange="App.onDashboardPeriodChange()" class="w-full text-xs border rounded p-1.5 bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-800">
+                                <option value="Todos">Todos los periodos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Facultad</label>
+                            <select id="dash-filter-faculty" onchange="App.loadDashboardView()" class="w-full text-xs border rounded p-1.5 bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-800">
+                                <option value="Todas">Todas las facultades</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Semestre Cursado</label>
+                            <select id="dash-filter-semester" onchange="App.loadDashboardView()" class="w-full text-xs border rounded p-1.5 bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-800">
+                                <option value="Todos">Todos los semestres</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Iniciativa Emprendedora</label>
+                            <select id="dash-filter-status" onchange="App.loadDashboardView()" class="w-full text-xs border rounded p-1.5 bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-800">
+                                <option value="Todos">Todos los estados</option>
+                                <option value="con_iniciativa">Con iniciativa / idea</option>
+                                <option value="sin_iniciativa">Sin emprendimiento</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Etapa INNPulsa</label>
+                            <select id="dash-filter-stage" onchange="App.loadDashboardView()" class="w-full text-xs border rounded p-1.5 bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-800">
+                                <option value="Todas">Todas las etapas</option>
+                                <option value="Pre-semilla">Pre-semilla</option>
+                                <option value="Semilla">Semilla</option>
+                                <option value="Temprana">Temprana</option>
+                                <option value="Consolidación">Consolidación</option>
+                                <option value="Escalamiento">Escalamiento</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard KPI Metric Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="usta-card p-4 kpi-card">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Participantes</p>
+                        <h3 id="dash-kpi-participantes" class="text-3xl font-black text-[#0B2545] mt-1">0</h3>
+                        <p id="dash-kpi-autorizados" class="text-xs text-green-700 font-medium mt-1">0 autorizados</p>
+                    </div>
+                    <div class="usta-card p-4 kpi-card green">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Con Iniciativa</p>
+                        <h3 id="dash-kpi-con-iniciativa" class="text-3xl font-black text-blue-900 mt-1">0</h3>
+                        <p id="dash-kpi-pct-con" class="text-xs text-blue-700 font-bold mt-1">0.0% del total</p>
+                    </div>
+                    <div class="usta-card p-4 kpi-card">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sin Emprendimiento</p>
+                        <h3 id="dash-kpi-sin-iniciativa" class="text-3xl font-black text-gray-700 mt-1">0</h3>
+                        <p id="dash-kpi-pct-sin" class="text-xs text-gray-500 font-medium mt-1">0.0% del total</p>
+                    </div>
+                    <div class="usta-card p-4 kpi-card gold">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Apoyo Institucional</p>
+                        <h3 id="dash-kpi-apoyo" class="text-3xl font-black text-[#B45309] mt-1">0</h3>
+                        <p id="dash-kpi-pct-apoyo" class="text-xs text-amber-700 font-medium mt-1">0.0% recibieron apoyo</p>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Grid 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chart 1: Situación Emprendedora -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-1">Participación y Situación Emprendedora</h4>
+                        <p class="text-xs text-gray-500 mb-3">Proporción de estudiantes con iniciativa declarada vs. sin iniciativa</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-situacion"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Semestres -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-1">Distribución por Semestre Académico</h4>
+                        <p class="text-xs text-gray-500 mb-3">Participantes según nivel de avance en el plan de estudios</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-semestres"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Grid 2 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chart 3: Etapas INNPulsa -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-1">Etapas de las Iniciativas (Metodología INNPulsa)</h4>
+                        <p class="text-xs text-gray-500 mb-3">Nivel de madurez reportado por estudiantes con emprendimiento</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-etapas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 4: Sectores Económicos -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-1">Sectores Económicos Reportados</h4>
+                        <p class="text-xs text-gray-500 mb-3">Principales sectores productivos de las ideas y empresas activas</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-sectores"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Grid 3 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chart 5: Fuentes de Financiación -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-1">Fuentes de Financiación Declaradas</h4>
+                        <p class="text-xs text-gray-500 mb-3">Origen de los recursos económicos para emprender</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-fuentes"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 6: Apoyo Institucional -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-1">Apoyo Institucional Declarado</h4>
+                        <p class="text-xs text-gray-500 mb-3">Recepción de respaldo de entidades públicas o privadas</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-apoyo"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Questions Breakdown (P13, P16, P17, P20, P21) -->
+                <div class="usta-card p-6">
+                    <div class="border-b pb-3 mb-4">
+                        <h3 class="text-base font-bold text-blue-950">Orientaciones del Perfil Emprendedor</h3>
+                        <p class="text-xs text-gray-500">Distribución descriptiva de respuestas a las dimensiones del cuestionario institucional (autodeclaradas)</p>
+                    </div>
+                    <div id="dash-perfil-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 3: ANÁLISIS POR FACULTAD -->
+            <!-- ========================================================================= -->
+            <section id="view-facultad" class="view-section hidden space-y-6">
+                <!-- Selection Bar -->
+                <div class="usta-card p-4 bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Periodo</label>
+                            <select id="fac-select-period" onchange="App.onFacultyViewPeriodChange()" class="text-xs border rounded p-1.5 bg-gray-50 font-medium">
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Facultad</label>
+                            <select id="fac-select-faculty" onchange="App.loadFacultadView()" class="text-xs border rounded p-1.5 bg-gray-50 font-medium">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="App.previewFacultyCurrentReport()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium px-3 py-2 rounded transition border">
+                            👁️ Previsualizar PDF
+                        </button>
+                        <button onclick="App.downloadFacultyCurrentReport()" class="text-xs bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded transition shadow-sm">
+                            ⬇️ Descargar Informe PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Header Details -->
+                <div class="usta-card p-6 border-l-4 border-blue-900">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2 id="fac-view-title" class="text-2xl font-bold text-blue-950">Facultad</h2>
+                            <p id="fac-view-period" class="text-sm text-gray-600 font-medium mt-0.5">Periodo</p>
+                        </div>
+                        <div class="flex space-x-4">
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500 block">Participantes</span>
+                                <span id="fac-kpi-part" class="text-2xl font-black text-blue-900">0</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500 block">Con Iniciativa</span>
+                                <span id="fac-kpi-con" class="text-2xl font-black text-green-700">0</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500 block">Sin Emprendimiento</span>
+                                <span id="fac-kpi-sin" class="text-2xl font-black text-gray-600">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Resumen Ejecutivo Institucional</h4>
+                        <p id="fac-resumen-text" class="text-sm text-gray-800 leading-relaxed bg-slate-50 p-3 rounded border border-gray-200">
+                            Cargando análisis...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tables Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Etapas Table -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-2">Madurez de Iniciativas (INNPulsa)</h4>
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Etapa</th>
+                                    <th class="text-right">Cantidad</th>
+                                    <th class="text-right">Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fac-etapas-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Sectores Table -->
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-2">Sectores Económicos Principales</h4>
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Sector</th>
+                                    <th class="text-right">Cantidad</th>
+                                    <th class="text-right">Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fac-sectores-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Accompaniment Guidelines -->
+                <div class="usta-card p-6">
+                    <h4 class="text-sm font-bold text-blue-950 mb-3">Líneas de Acompañamiento Sugeridas para la Decanatura</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                            <h5 class="text-xs font-bold text-blue-900 mb-1">1. Exploración e Innovación</h5>
+                            <p id="fac-acomp-exploracion" class="text-xs text-gray-700 leading-relaxed"></p>
+                        </div>
+                        <div class="p-3 bg-teal-50 border border-teal-200 rounded">
+                            <h5 class="text-xs font-bold text-teal-900 mb-1">2. Validación y Viabilidad</h5>
+                            <p id="fac-acomp-validacion" class="text-xs text-gray-700 leading-relaxed"></p>
+                        </div>
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded">
+                            <h5 class="text-xs font-bold text-amber-900 mb-1">3. Fortalecimiento Empresarial</h5>
+                            <p id="fac-acomp-fortalecimiento" class="text-xs text-gray-700 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 4: COMPARACIÓN DE PERIODOS -->
+            <!-- ========================================================================= -->
+            <section id="view-comparacion" class="view-section hidden space-y-6">
+                <!-- Comparison Controls -->
+                <div class="usta-card p-4 bg-white flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Base (P1)</label>
+                            <select id="comp-select-p1" class="text-xs border rounded p-1.5 bg-gray-50 font-medium"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Comparado (P2)</label>
+                            <select id="comp-select-p2" class="text-xs border rounded p-1.5 bg-gray-50 font-medium"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Alcance / Facultad</label>
+                            <select id="comp-select-faculty" class="text-xs border rounded p-1.5 bg-gray-50 font-medium">
+                                <option value="Todas">Toda la Universidad</option>
+                            </select>
+                        </div>
+                        <div class="pt-5">
+                            <button onclick="App.loadComparacionView()" class="text-xs bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-1.5 rounded transition">
+                                Comparar
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="App.downloadComparativeReport()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded transition shadow-sm">
+                        ⬇️ Descargar Informe Comparativo PDF
+                    </button>
+                </div>
+
+                <!-- Analytical Commentary -->
+                <div class="usta-card p-4 bg-blue-50 border border-blue-200">
+                    <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wide mb-1">Síntesis Analítica de Variación</h4>
+                    <p id="comp-commentary" class="text-xs text-blue-950 leading-relaxed"></p>
+                </div>
+
+                <!-- Side-by-side KPI cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="usta-card p-4 kpi-card">
+                        <p class="text-xs font-bold text-gray-500 uppercase">Participantes (P1 vs P2)</p>
+                        <div class="flex items-baseline space-x-2 mt-1">
+                            <span id="comp-val-part-p1" class="text-xl font-bold text-gray-600">0</span>
+                            <span class="text-sm text-gray-400">➔</span>
+                            <span id="comp-val-part-p2" class="text-2xl font-black text-blue-900">0</span>
+                        </div>
+                        <p id="comp-diff-part" class="text-xs font-bold text-green-600 mt-1">Δ 0</p>
+                    </div>
+
+                    <div class="usta-card p-4 kpi-card green">
+                        <p class="text-xs font-bold text-gray-500 uppercase">Tasa Emprendedora (% Con)</p>
+                        <div class="flex items-baseline space-x-2 mt-1">
+                            <span id="comp-val-init-p1" class="text-xl font-bold text-gray-600">0%</span>
+                            <span class="text-sm text-gray-400">➔</span>
+                            <span id="comp-val-init-p2" class="text-2xl font-black text-blue-900">0%</span>
+                        </div>
+                        <p id="comp-diff-init" class="text-xs font-bold text-green-600 mt-1">Δ 0 pp</p>
+                    </div>
+                </div>
+
+                <!-- Tables -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-2">Evolución de Etapas INNPulsa</h4>
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Etapa</th>
+                                    <th class="text-right">P1 (Cant/%)</th>
+                                    <th class="text-right">P2 (Cant/%)</th>
+                                    <th class="text-right">Var. pp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comp-stage-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="usta-card p-4">
+                        <h4 class="text-sm font-bold text-blue-950 mb-2">Desglose por Facultad</h4>
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Facultad</th>
+                                    <th class="text-right">P1 Part.</th>
+                                    <th class="text-right">P1 %</th>
+                                    <th class="text-right">P2 Part.</th>
+                                    <th class="text-right">P2 %</th>
+                                    <th class="text-right">Var. pp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comp-fac-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 5: CARGAR INFORMACIÓN (EXCEL FORMS) -->
+            <!-- ========================================================================= -->
+            <section id="view-cargar" class="view-section admin-only hidden space-y-6">
+                <div class="usta-card p-6">
+                    <div class="border-b pb-3 mb-4 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-blue-950">Módulo de Carga y Actualización de Información</h3>
+                            <p class="text-xs text-gray-500">Carga directa del archivo Excel original exportado desde Microsoft Forms (OfficeForms.Table o estándar)</p>
+                        </div>
+                        <span class="text-xs bg-amber-100 text-amber-900 font-bold px-2.5 py-1 rounded border border-amber-200">
+                            Rol: Administrador
+                        </span>
+                    </div>
+
+                    <!-- Upload Zone -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-900 transition bg-slate-50 cursor-pointer" onclick="document.getElementById('excel-file-input').click()">
+                        <input type="file" id="excel-file-input" class="hidden" accept=".xlsx, .csv" onchange="App.handleFileSelect(event)">
+                        <span class="text-4xl block mb-2">📂</span>
+                        <h4 class="text-sm font-bold text-gray-800">Haga clic aquí para seleccionar el archivo Excel (.xlsx) de Forms</h4>
+                        <p class="text-xs text-gray-500 mt-1">El sistema identificará automáticamente los encabezados, registros autorizados y controlará duplicados</p>
+                    </div>
+
+                    <div id="upload-progress" class="hidden mt-4 p-4 bg-blue-50 text-blue-900 rounded text-center text-sm font-medium animate-pulse">
+                        ⏳ Analizando estructura del archivo, detectando periodos y verificando duplicados...
+                    </div>
+
+                    <!-- Methodological Instructions -->
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                        <div class="p-3 bg-gray-50 rounded border">
+                            <span class="font-bold text-blue-950 block mb-1">1. Formato Original</span>
+                            No modifique nombres de columnas ni elimine encabezados. El lector estandariza espacios, tildes y caracteres especiales.
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded border">
+                            <span class="font-bold text-blue-950 block mb-1">2. Control de Duplicados</span>
+                            Si vuelve a cargar el mismo archivo o una versión más reciente, solo se añadirán los nuevos registros y se actualizarán los modificados.
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded border">
+                            <span class="font-bold text-blue-950 block mb-1">3. Protección de Datos</span>
+                            Las respuestas marcadas como "No Autorizo" se contabilizan para participación, pero se excluyen de los análisis de caracterización.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 6: GENERAR INFORMES (PDF Y ZIP) -->
+            <!-- ========================================================================= -->
+            <section id="view-informes" class="view-section hidden space-y-6">
+                <div class="border-b pb-3">
+                    <h2 class="text-xl font-bold text-blue-950">Centro de Generación de Informes Institucionales</h2>
+                    <p class="text-xs text-gray-500">Documentos formales con diseño estandarizado institucional para decanaturas y comités directivos</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Opción 1: Individual por Facultad -->
+                    <div class="usta-card p-5 border-t-4 border-blue-900 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-xl">📄</span>
+                                <h3 class="text-base font-bold text-blue-950">Opción 1: Informe Individual por Facultad</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-4">Genera un documento PDF formal de 4 páginas con los resultados, tablas, etapas y perfil de una facultad específica.</p>
+                            <div class="space-y-3 mb-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Académico</label>
+                                    <select id="rep-select-period" onchange="App.onReportPeriodChange()" class="w-full text-xs border rounded p-2 bg-gray-50 font-medium"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Facultad</label>
+                                    <select id="rep-select-faculty" class="w-full text-xs border rounded p-2 bg-gray-50 font-medium"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2 pt-2 border-t">
+                            <button onclick="App.previewFacultyReportDirect()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-medium py-2 rounded transition border">
+                                👁️ Previsualizar
+                            </button>
+                            <button onclick="App.downloadFacultyReportDirect()" class="flex-1 bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold py-2 rounded transition shadow-sm">
+                                ⬇️ Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Opción 2: Masiva en ZIP -->
+                    <div class="usta-card p-5 border-t-4 border-[#FDB813] flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-xl">📦</span>
+                                <h3 class="text-base font-bold text-blue-950">Opción 2: Todos los Informes por Facultad (ZIP)</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-4">Genera individualmente todos los informes de las facultades del periodo seleccionado y los empaqueta en un archivo comprimido .ZIP listo para su entrega a decanaturas.</p>
+                            <div class="mb-4">
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Académico</label>
+                                <select id="rep-zip-period" class="w-full text-xs border rounded p-2 bg-gray-50 font-medium"></select>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <button onclick="App.downloadZipDirect()" class="w-full bg-[#FDB813] hover:bg-[#E5A50B] text-[#0B2545] text-xs font-black py-2.5 rounded transition shadow-sm">
+                                ⬇️ Descargar Paquete ZIP con Todos los Informes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Opción 3: Informe General Institucional -->
+                    <div class="usta-card p-5 border-t-4 border-green-600 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-xl">🏛️</span>
+                                <h3 class="text-base font-bold text-blue-950">Opción 3: Informe General Consolidado</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-4">Documento PDF formal consolidado de toda la Seccional Villavicencio con los indicadores globales del periodo.</p>
+                            <div class="mb-4">
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Académico</label>
+                                <select id="rep-gen-period" class="w-full text-xs border rounded p-2 bg-gray-50 font-medium"></select>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <button onclick="App.downloadGeneralReport()" class="w-full bg-green-700 hover:bg-green-800 text-white text-xs font-bold py-2.5 rounded transition shadow-sm">
+                                ⬇️ Descargar Informe General PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Opción 4: Informe Comparativo -->
+                    <div class="usta-card p-5 border-t-4 border-purple-600 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-xl">⚖️</span>
+                                <h3 class="text-base font-bold text-blue-950">Opción 4: Informe Comparativo de Periodos</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-4">Compara métricas, tasas emprendedoras y etapas entre dos periodos académicos en un reporte formal.</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Base</label>
+                                    <select id="rep-comp-p1" class="w-full text-xs border rounded p-1.5 bg-gray-50 font-medium"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Periodo Comparado</label>
+                                    <select id="rep-comp-p2" class="w-full text-xs border rounded p-1.5 bg-gray-50 font-medium"></select>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Facultad / Alcance</label>
+                                <select id="rep-comp-faculty" class="w-full text-xs border rounded p-1.5 bg-gray-50 font-medium">
+                                    <option value="Todas">Toda la Universidad</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <button onclick="App.downloadComparativeReportDirect()" class="w-full bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold py-2.5 rounded transition shadow-sm">
+                                ⬇️ Descargar Informe Comparativo PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 7: HISTÓRICO DE PERIODOS -->
+            <!-- ========================================================================= -->
+            <section id="view-historico" class="view-section hidden space-y-6">
+                <div class="border-b pb-3">
+                    <h2 class="text-xl font-bold text-blue-950">Histórico de Periodos y Auditoría de Cargas</h2>
+                    <p class="text-xs text-gray-500">Consulta de cohortes académicas anteriores y registro trazable de actualizaciones de información</p>
+                </div>
+
+                <div class="usta-card p-6">
+                    <h3 class="text-sm font-bold text-blue-950 mb-3">Cohortes Académicas Registradas</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Periodo</th>
+                                    <th class="text-left">Fecha Inicial</th>
+                                    <th class="text-left">Última Actualización</th>
+                                    <th class="text-left">Total Recibidas</th>
+                                    <th class="text-left">Autorizadas</th>
+                                    <th class="text-left">Facultades</th>
+                                    <th class="text-left">Estado</th>
+                                    <th class="text-right">Acciones Directas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hist-periods-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="usta-card p-6">
+                    <h3 class="text-sm font-bold text-blue-950 mb-3">Bitácora de Cargas y Actualizaciones Recientes</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Fecha y Hora</th>
+                                    <th class="text-left">Periodo</th>
+                                    <th class="text-left">Archivo Procesado</th>
+                                    <th class="text-right">Filas</th>
+                                    <th class="text-right">Nuevos</th>
+                                    <th class="text-right">Modificados</th>
+                                    <th class="text-right">Sin Cambios</th>
+                                    <th class="text-left">Funcionario</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hist-uploads-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 8: ADMINISTRACIÓN -->
+            <!-- ========================================================================= -->
+            <section id="view-admin" class="view-section admin-only hidden space-y-6">
+                <div class="border-b pb-3 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-blue-950">Módulo de Administración del Sistema</h2>
+                        <p class="text-xs text-gray-500">Gestión de usuarios autorizados, periodos, copias de seguridad y configuraciones institucionales</p>
+                    </div>
+                    <span class="text-xs font-bold px-3 py-1 rounded bg-amber-100 text-amber-900 border border-amber-200">
+                        Acceso Restringido a Administradores
+                    </span>
+                </div>
+
+                <!-- Admin Tabs / Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Users Management Card -->
+                    <div class="usta-card p-6">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="text-sm font-bold text-blue-950">Usuarios Autorizados</h3>
+                            <button onclick="App.createNewUser()" class="text-xs bg-blue-900 hover:bg-blue-800 text-white font-medium px-2.5 py-1 rounded">
+                                + Nuevo Usuario
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full usta-table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-left">Nombre</th>
+                                        <th class="text-left">Usuario</th>
+                                        <th class="text-left">Rol</th>
+                                        <th class="text-left">Estado</th>
+                                        <th class="text-left">Último Acceso</th>
+                                        <th class="text-right">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Period & Backup Management -->
+                    <div class="space-y-6">
+                        <!-- Periods Card -->
+                        <div class="usta-card p-6">
+                            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                                <h3 class="text-sm font-bold text-blue-950">Gestión de Periodos Académicos</h3>
+                                <button onclick="App.createNewPeriodPrompt()" class="text-xs bg-green-700 hover:bg-green-800 text-white font-medium px-2.5 py-1 rounded">
+                                    + Crear Periodo (ej. 2027-1)
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-3">
+                                Permite habilitar periodos futuros sin alterar el código de la aplicación.
+                            </p>
+                        </div>
+
+                        <!-- Backups Card -->
+                        <div class="usta-card p-6 border-l-4 border-amber-500">
+                            <h3 class="text-sm font-bold text-blue-950 mb-2">Copias de Seguridad y Restauración</h3>
+                            <p class="text-xs text-gray-600 mb-4">
+                                Descargue un respaldo íntegro de la base de datos o restaure un archivo previamente exportado.
+                            </p>
+                            <div class="flex space-x-3">
+                                <button onclick="App.downloadBackupFile()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 rounded transition text-center shadow-sm">
+                                    ⬇️ Exportar Copia de Seguridad
+                                </button>
+                                <button onclick="document.getElementById('backup-restore-input').click()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-medium py-2 rounded transition border text-center">
+                                    ⬆️ Restaurar Respaldo
+                                </button>
+                                <input type="file" id="backup-restore-input" class="hidden" accept=".json" onchange="App.handleBackupRestore(event)">
+                            </div>
+                        </div>
+
+                        <!-- M365 Integration Info -->
+                        <div class="usta-card p-6 bg-slate-50 border border-slate-200">
+                            <h3 class="text-sm font-bold text-blue-950 mb-1">Integración Microsoft 365 (Fase 2)</h3>
+                            <p class="text-xs text-gray-600 mb-2">
+                                La arquitectura está preparada para sincronizar directamente con el Excel de Microsoft Forms en SharePoint/OneDrive mediante Microsoft Graph API OAuth 2.0.
+                            </p>
+                            <p class="text-xs text-gray-500 italic">
+                                Mientras la universidad autoriza los permisos de Azure AD, el sistema funciona de manera autónoma e ilimitada mediante la carga de archivos Excel.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Logs Table -->
+                <div class="usta-card p-6">
+                    <h3 class="text-sm font-bold text-blue-950 mb-3">Registro de Auditoría y Acceso Institucional</h3>
+                    <div class="overflow-x-auto max-h-60">
+                        <table class="w-full usta-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Fecha</th>
+                                    <th class="text-left">Usuario</th>
+                                    <th class="text-left">Acción</th>
+                                    <th class="text-left">Detalle</th>
+                                    <th class="text-left">IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-audit-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: LOGIN -->
+    <!-- ========================================================================= -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative border-t-4 border-[#FDB813]">
+            <button onclick="App.closeLoginModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            <div class="text-center mb-4">
+                <img src="/static/img/logo_usta.png" alt="USTA Logo" class="h-16 mx-auto mb-2">
+                <h3 class="text-base font-bold text-blue-950">Acceso a Funcionarios</h3>
+                <p class="text-xs text-gray-500">Dirección de Proyección Social</p>
+            </div>
+            <form onsubmit="App.submitLogin(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Correo Institucional</label>
+                    <input type="email" id="login-email" required placeholder="admin@usta.edu.co" class="w-full text-xs border rounded p-2 focus:ring-1 focus:ring-blue-900">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full text-xs border rounded p-2 focus:ring-1 focus:ring-blue-900">
+                </div>
+                <button type="submit" class="w-full bg-[#0B2545] hover:bg-blue-900 text-white font-bold py-2 rounded text-xs transition shadow-sm">
+                    Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: PREVIEW DE CARGA DE EXCEL -->
+    <!-- ========================================================================= -->
+    <div id="preview-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col p-6 border-t-4 border-blue-900">
+            <div class="flex justify-between items-start border-b pb-3 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-blue-950">Revisión y Validación de Carga</h3>
+                    <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-600">
+                        <span>Archivo: <strong id="prev-filename" class="text-gray-800"></strong></span>
+                        <span>· Periodo destino:</span>
+                        <select id="prev-period-select" class="text-xs border rounded p-1 bg-white font-bold text-blue-900 focus:ring-1 focus:ring-blue-800"></select>
+                        <span id="prev-period" class="hidden"></span>
+                    </div>
+                </div>
+                <button onclick="App.closePreviewModal()" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+
+            <div id="prev-warnings-container" class="mb-3"></div>
+
+            <!-- Validation Counters -->
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4 text-center">
+                <div class="p-2 bg-gray-50 rounded border">
+                    <span class="text-xs text-gray-500 block">Total Filas</span>
+                    <span id="prev-total-rows" class="text-base font-bold text-gray-900">0</span>
+                </div>
+                <div class="p-2 bg-green-50 rounded border border-green-200">
+                    <span class="text-xs text-green-700 block">Autorizados</span>
+                    <span id="prev-auth-rows" class="text-base font-bold text-green-800">0</span>
+                </div>
+                <div class="p-2 bg-gray-50 rounded border">
+                    <span class="text-xs text-gray-500 block">No Autorizados</span>
+                    <span id="prev-unauth-rows" class="text-base font-bold text-gray-700">0</span>
+                </div>
+                <div class="p-2 bg-blue-50 rounded border border-blue-200">
+                    <span class="text-xs text-blue-700 block">Nuevos</span>
+                    <span id="prev-new-rows" class="text-base font-bold text-blue-900">0</span>
+                </div>
+                <div class="p-2 bg-amber-50 rounded border border-amber-200">
+                    <span class="text-xs text-amber-700 block">Modificados</span>
+                    <span id="prev-updated-rows" class="text-base font-bold text-amber-800">0</span>
+                </div>
+                <div class="p-2 bg-gray-50 rounded border">
+                    <span class="text-xs text-gray-500 block">Sin Cambios</span>
+                    <span id="prev-unchanged-rows" class="text-base font-bold text-gray-600">0</span>
+                </div>
+            </div>
+
+            <!-- Mode selector -->
+            <div class="mb-4 bg-slate-50 p-3 rounded border text-xs">
+                <label class="font-bold text-gray-700 block mb-1">Modo de actualización en base de datos:</label>
+                <select id="upload-mode-select" class="w-full border rounded p-1.5 bg-white font-medium">
+                    <option value="smart_update">Actualización Inteligente (Recomendado: agrega nuevos registros, actualiza modificados y evita duplicados)</option>
+                    <option value="replace_all">Sustitución Completa (Reemplaza todos los datos del periodo con este nuevo archivo)</option>
+                </select>
+            </div>
+
+            <!-- Sample Table -->
+            <div class="flex-1 overflow-y-auto mb-4 border rounded">
+                <table class="w-full usta-table">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Id</th>
+                            <th class="text-left">Facultad</th>
+                            <th class="text-left">Semestre</th>
+                            <th class="text-left">Tratamiento</th>
+                            <th class="text-left">Estado Detección</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prev-samples-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end space-x-3 pt-3 border-t">
+                <button onclick="App.closePreviewModal()" class="px-4 py-2 rounded text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
+                    Cancelar
+                </button>
+                <button onclick="App.confirmUploadCommit()" class="px-5 py-2 rounded text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 transition shadow-sm">
+                    Confirmar y Actualizar Base de Datos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: VISOR DE PDF -->
+    <!-- ========================================================================= -->
+    <div id="pdf-modal" class="hidden fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-white rounded-lg shadow-2xl max-w-5xl w-full h-[95vh] flex flex-col p-4 border-t-4 border-blue-900">
+            <div class="flex justify-between items-center border-b pb-2 mb-2">
+                <h3 id="pdf-modal-title" class="text-sm font-bold text-blue-950">Vista Previa de Informe PDF</h3>
+                <button onclick="App.closePdfModal()" class="text-gray-500 hover:text-gray-800 text-lg font-bold px-2">✕</button>
+            </div>
+            <div class="flex-1 w-full bg-gray-200 rounded overflow-hidden">
+                <iframe id="pdf-modal-frame" src="" class="w-full h-full border-0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center">
+            <p>© 2026 Universidad Santo Tomás – Seccional Villavicencio · Dirección de Proyección Social</p>
+            <p class="mt-1 sm:mt-0 font-medium text-blue-950">Sistema de Análisis y Seguimiento del Perfil Emprendedor</p>
+        </div>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="/static/js/chart_utils.js?v=20261022_3"></script>
+    <script src="/static/js/app.js?v=20261022_3"></script>
+</body>
+</html>

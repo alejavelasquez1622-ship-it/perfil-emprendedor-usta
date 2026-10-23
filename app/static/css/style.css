@@ -1,0 +1,113 @@
+:root {
+    --usta-navy: #0B2545;
+    --usta-navy-light: #133E87;
+    --usta-gold: #FDB813;
+    --usta-gold-hover: #E5A50B;
+    --usta-red: #8B0000;
+    --usta-bg-light: #F8FAFC;
+    --usta-card-border: #E2E8F0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background-color: #F8FAFC;
+    color: #1F2937;
+    margin: 0;
+    padding: 0;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+/* Nav Item active styling */
+.nav-item.active {
+    background-color: rgba(253, 184, 19, 0.15);
+    color: #FDB813;
+    border-left: 4px solid #FDB813;
+    font-weight: 600;
+}
+
+/* Institutional Badge */
+.badge-admin {
+    background-color: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+}
+
+.badge-consulta {
+    background-color: #E0E7FF;
+    color: #3730A3;
+    border: 1px solid #C7D2FE;
+}
+
+/* Cards shadow and hover */
+.usta-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.usta-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* KPI Cards */
+.kpi-card {
+    border-top: 4px solid var(--usta-navy);
+}
+
+.kpi-card.gold {
+    border-top-color: var(--usta-gold);
+}
+
+.kpi-card.green {
+    border-top-color: #10B981;
+}
+
+.kpi-card.red {
+    border-top-color: #EF4444;
+}
+
+/* Table styles */
+.usta-table th {
+    background-color: #EBF3FA;
+    color: #0B2545;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.65rem 1rem;
+    border-bottom: 2px solid #CBD5E1;
+}
+
+.usta-table td {
+    padding: 0.65rem 1rem;
+    font-size: 0.8125rem;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.usta-table tr:hover td {
+    background-color: #F8FAFC;
+}
+
+/* Print styles for PDFs or browser prints */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
